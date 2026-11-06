@@ -1,0 +1,50 @@
+HeCommerce: Documento de Requisitos
+1. Introdução
+O HeCommerce será uma plataforma de e-commerce (comércio eletrônico) distribuída, desenvolvida utilizando uma arquitetura baseada em microsserviços. 
+O sistema permitirá que usuários consultem produtos, realizem compras, efetuem pagamentos e acompanhem seus pedidos.
+
+O sistema será projetado para oferecer escalabilidade, tolerância a falhas, disponibilidade e monitoramento, utilizando tecnologias como Spring Boot, Docker, Kubernetes, bancos de dados relacionais e NoSQL e sistemas de mensageria. 
+2. Requisitos Funcionais
+RF01. Cadastro de usuário
+ O sistema deverá permitir que novos usuários realizem seu cadastro
+RF02. Login
+ O sistema deverá permitir que usuários já cadastrados façam o login
+RF03. Consulta de produtos
+ O sistema deverá permitir visualizar os produtos disponíveis e seus respectivos preços e informações
+RF04. Carrinho de compras
+ O sistema deverá permitir adicionar e remover produtos do carrinho
+RF05. Realização de pedidos
+ O sistema deverá permitir que o usuário finalize uma compra e realize um pedido
+RF06. Pagamento
+ O sistema deverá processar o pagamento de um pedido
+RF07. Acompanhamento do pedido
+ O sistema deverá permitir consultar o status de um pedido
+RF08. Recomendações
+ O sistema deverá fornecer recomendações de produtos
+RF09. Monitoramento
+ O sistema deverá disponibilizar métricas para o monitoramento dos serviços.
+3. Requisitos Não Funcionais
+RNF01. Escalabilidade
+ O sistema deverá permitir a execução de múltiplas instâncias dos serviços
+RNF02. Tolerância a falhas
+ O sistema deverá possuir mecanismos para lidar com falhas de comunicação entre os serviços
+RNF03. Segurança
+ O sistema deverá utilizar mecanismos de autenticação e autorização, como JWT
+RNF04. Observabilidade
+ O sistema deverá permitir o acompanhamento de métricas dos serviços através de Prometheus e Grafana
+RNF05. Resiliência
+ Os serviços deverão possuir mecanismos de retry e circuit breaker para lidar com falhas temporárias
+RNF06. Comunicação
+ Os serviços deverão utilizar comunicação síncrona e assíncrona de acordo com suas necessidades
+RNF07. Mensageria
+ Os serviços deverão utilizar mecanismos de mensageria, como RabbitMQ e Kafka, para comunicação assíncrona
+RNF08. Containerização
+ Os serviços deverão ser executados em containers Docker
+RNF09. Orquestração
+ Os serviços deverão ser preparados para execução e gerenciamento através do Kubernetes
+RNF10. Banco de dados
+ Os serviços deverão utilizar bancos de dados adequados às suas necessidades, incluindo PostgreSQL, MongoDB e Redis
+RNF11. Logs
+ Os serviços deverão disponibilizar informações de log para auxiliar no monitoramento e identificação de problemas
+RNF12. Implantação em nuvem
+ O sistema deverá ser preparado para implantação em ambientes de nuvem, utilizando AWS ou Azure.

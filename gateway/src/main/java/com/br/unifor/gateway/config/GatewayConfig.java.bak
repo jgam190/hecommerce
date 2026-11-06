@@ -1,0 +1,54 @@
+package com.br.unifor.gateway.config;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.gateway.route.RouteLocator;
+import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Configuração das rotas do API Gateway.
+ * Cada serviço tem sua própria rota e filtro de path.
+ */
+@Configuration
+public class GatewayConfig {
+
+    /**
+     * Define as rotas do gateway com prefixos de API.
+     */
+    @Bean
+    public RouteLocator apiRoutes(
+            RouteLocatorBuilder builder,
+            @Value("${services.products.base-url}") String productsBaseUrl,
+            @Value("${services.orders.base-url}") String ordersBaseUrl) {
+        return builder.routes()
+                // Serviço de Autenticação
+                .route(r -> r.path("/api/auth/**")
+                        .uri("lb://auth"))
+                .route(r -> r.path("/api/protected/**")
+                        .uri("lb://auth"))
+
+                // Serviço de Catálogo (Produtos)
+                .route(r -> r.path("/api/products/**")
+                        .filters(f -> f.stripPrefix(1))
+                        .uri(productsBaseUrl))
+
+                // Serviço de Pedidos
+                .route(r -> r.path("/api/orders/**")
+                        .uri(ordersBaseUrl))
+
+                // Serviço de Pagamentos
+                .route(r -> r.path("/api/payments/**")
+                        .uri("lb://payments"))
+
+                // Serviço de Logística
+                .route(r -> r.path("/api/logistics/**")
+                        .uri("lb://logistics"))
+
+                // Serviço de Recomendação
+                .route(r -> r.path("/api/recommendation/**")
+                        .uri("lb://recommendation"))
+
+                .build();
+    }
+}

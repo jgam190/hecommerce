@@ -1,0 +1,69 @@
+HeCommerce: Documento de Arquitetura
+1. Introdução
+O HeCommerce será desenvolvido utilizando uma arquitetura distribuída baseada em microsserviços(como dito no arquivo de requisitos). Cada serviço será responsável por uma parte específica do sistema, permitindo uma melhor organização, escalabilidade e tolerância a falhas.
+A comunicação entre os serviços será realizada por meio de diferentes tecnologias, de acordo com as necessidades de cada componente, utilizando comunicação síncrona e assíncrona.
+2. Arquitetura do Sistema
+O sistema será composto por um frontend, um API Gateway e diferentes microsserviços responsáveis pelas principais funcionalidades da plataforma.
+A arquitetura será organizada da seguinte forma:
+	
+Frontend: responsável pela interação com os usuários
+API Gateway: Responsável por receber e encaminhar as requisições para os serviços
+Users/Auth: responsável pelo cadastro e autenticação dos usuários
+Products: responsável pelo catálogo de produtos e estoque
+Orders: responsável pelo processamento e acompanhamento dos pedidos
+Payments: Responsável pelo processamento dos pagamentos
+Recommendations: Responsável pelas recomendações de produtos
+Logistics: Responsável pelo acompanhamento das entregas
+Monitoramento: Responsável pelo acompanhamento das métricas dos serviços
+
+
+3. Microsserviços
+3.1 Users/Auth
+Responsável pelo cadastro dos usuários, login e autenticação do sistema. Será utilizado JWT para realizar a autenticação dos usuários.
+3.2 Products
+Responsável pelo gerenciamento e consulta dos produtos disponíveis no sistema, incluindo informações relacionadas ao catálogo e ao estoque.
+3.3 Orders
+Responsável pela criação, processamento e acompanhamento dos pedidos realizados pelos usuários.
+3.4 Payments
+Responsável pelo processamento dos pagamentos. A comunicação relacionada ao processamento de pagamentos utilizará mensageria assíncrona através do RabbitMQ.
+3.5 Recommendations
+Responsável por fornecer recomendações de produtos aos usuários. A comunicação com esse serviço utilizará gRPC, integrado a uma aplicação de Machine Learning desenvolvida em Python.
+3.6 Logistics
+Responsável pelo acompanhamento do status das entregas. A comunicação relacionada aos eventos de logística utilizará Kafka e Spring Cloud Stream, podendo também utilizar MQTT para comunicação com dispositivos IoT responsáveis pelo rastreamento das entregas.
+3.7 Monitoramento
+Responsável pela coleta e visualização das métricas dos serviços, utilizando Spring Actuator, Prometheus e Grafana.
+
+4. Comunicação entre os Serviços
+O sistema utilizará diferentes formas de comunicação de acordo com as necessidades de cada serviço:
+REST: utilizado principalmente para a comunicação entre o frontend, o API Gateway e os serviços
+WebSocket: utilizado para notificações e atualizações em tempo real
+gRPC: utilizado na comunicação com o serviço de recomendações
+RabbitMQ: utilizado para comunicação assíncrona relacionada aos pagamentos
+Kafka: utilizado para comunicação assíncrona relacionada à logística e aos eventos do sistema
+MQTT: utilizado para comunicação com dispositivos IoT relacionados ao rastreamento das entregas
+Essa utilização de diferentes tipos de mecanismos de comunicação, como mostrado, faz com que cada serviço utilize a abordagem mais adequada para sua função.
+5. Bancos de Dados
+Os serviços utilizarão diferentes bancos de dados de acordo com suas necessidades:
+PostgreSQL: utilizado pelos serviços que necessitam de um banco de dados relacional, como usuários e pedidos
+MongoDB: utilizado pelo serviço de produtos
+Redis: utilizado para armazenamento temporário e cache de informações
+Essa divisão permite que cada serviço utilize o tipo de banco de dados mais adequado às características das informações que precisa armazenar.
+
+6. Infraestrutura
+Os serviços do sistema serão executados utilizando containers Docker. Durante o desenvolvimento, o Kubernetes poderá ser utilizado através do minikube para realizar a orquestração dos serviços.
+Para uma implantação em ambiente de produção, o sistema poderá ser preparado para utilização de serviços de nuvem da AWS ou Azure.
+A infraestrutura também contará com mecanismos de monitoramento através de Prometheus e Grafana.
+7. Diagrama da Arquitetura
+Nesta parte será apresentado o diagrama visual da arquitetura do HeCommerce, mostrando a comunicação entre o frontend, API Gateway, microsserviços, bancos de dados e ferramentas de mensageria e monitoramento.
+O diagrama deverá representar de forma visual o fluxo principal da aplicação e a relação entre os diferentes componentes do sistema.
+8. Tecnologias e Infraestrutura
+O backend do HeCommerce será desenvolvido utilizando Java 17+, Spring Boot, Spring Cloud e gRPC. O frontend será desenvolvido utilizando React.
+A infraestrutura será baseada em containers Docker e na orquestração através do Kubernetes, utilizando o minikube durante o desenvolvimento e podendo utilizar AWS ou Azure para implantação em ambiente de nuvem.
+Para comunicação assíncrona entre os serviços serão utilizados RabbitMQ e Apache Kafka. O serviço de recomendações utilizará gRPC integrado a uma aplicação de Machine Learning desenvolvida em Python.
+O sistema contará com mecanismos de resiliência, como Circuit Breaker e Retry, utilizando Resilience4J, com o objetivo de reduzir os impactos causados por falhas temporárias na comunicação entre os serviços.
+O Spring Actuator será utilizado para verificar a saúde dos serviços e disponibilizar informações necessárias para o monitoramento.
+Para o monitoramento da aplicação serão utilizados Prometheus e Grafana, permitindo acompanhar métricas dos serviços, como latência e quantidade de requisições. Para o gerenciamento e análise dos logs será utilizada a ELK Stack, composta por Elasticsearch, Logstash e Kibana.
+Na parte de logística, poderá ser utilizado MQTT para comunicação com dispositivos IoT responsáveis pelo rastreamento das entregas.
+Para a configuração e provisionamento da infraestrutura em nuvem será utilizado Terraform. O processo de integração e entrega contínua será realizado através de GitHub Actions.
+Por fim, serão utilizados testes de carga com JMeter para avaliar o comportamento do sistema e métricas como latência e throughput.
+Em resumo, tudo que tá no slide.
