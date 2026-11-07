@@ -21,8 +21,16 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
+            - name: SERVER_PORT
+              value: "8080"
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://postgres:5432/ordersdb"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "orders_user"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "orders_pass"
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka:9092"
             - name: PRODUCTS_SERVICE_URL
               value: "http://products:8080"
 ---
@@ -56,7 +64,7 @@ spec:
       containers:
         - name: postgres
           image: postgres:15
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5432
           env:
