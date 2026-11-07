@@ -59,7 +59,7 @@ services:
     environment:
       SPRING_MONGODB_URI: mongodb://mongodb:27017/productsdb
     ports:
-      - "8081:8080"
+      - "127.0.0.1:8081:8080"
     depends_on:
       mongodb:
         condition: service_healthy
@@ -80,7 +80,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       PRODUCTS_SERVICE_URL: http://products:8080
     ports:
-      - "8082:8080"
+      - "127.0.0.1:8082:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -99,7 +99,7 @@ services:
     build:
       context: ./auth
     ports:
-      - "8083:8080"
+      - "127.0.0.1:8083:8080"
     healthcheck:
       test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8080'"]
       interval: 10s
@@ -115,7 +115,7 @@ services:
       ORDERS_SERVICE_URL: http://orders:8080
       AUTH_SERVICE_URL: http://auth:8080
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     depends_on:
       products:
         condition: service_healthy
@@ -136,7 +136,7 @@ services:
     environment:
       VITE_PROXY_TARGET: http://gateway:8080
     ports:
-      - "5173:5173"
+      - "127.0.0.1:5173:5173"
     depends_on:
       gateway:
         condition: service_healthy
