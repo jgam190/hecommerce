@@ -141,6 +141,18 @@ services:
       gateway:
         condition: service_healthy
 
+  notifications:
+    build:
+      context: ./notifications
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      APP_KAFKA_TOPIC_PEDIDO: pedido-criado-topic
+    depends_on:
+      kafka:
+        condition: service_healthy
+      orders:
+        condition: service_healthy
+
 volumes:
   mongodb-data:
   postgres-data:
