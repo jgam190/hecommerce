@@ -12,8 +12,8 @@ Products → Orders → Kafka através do Gateway.
 - Acesso à internet na primeira execução: as imagens baixam dependências do
   Docker Hub, do Gradle, do Maven Central e do npm.
 - Cerca de 6 GB de memória disponíveis para o Docker.
-- Portas livres no computador: `8080`, `8081`, `8082`, `8083` e `5173`
-  (aplicações) e `5432`, `27017` e `9092` (infraestrutura).
+- Portas livres no computador: `8080`, `8081`, `8082`, `8083`, `8085` e `5173`
+  (aplicações) e `5432`, `27018` e `9092` (infraestrutura).
 
 Java e Node.js **não** são necessários: os serviços são compilados dentro das
 imagens Docker.
@@ -43,12 +43,20 @@ Gradle e suas dependências. Confira o estado dos containers:
 docker compose ps
 ```
 
-Aguarde até que todos apareçam como `healthy`. A inicialização segue esta
-ordem: bancos e Kafka, Products, Orders e Auth, Gateway e, por último, o
-frontend. Se algum serviço ficar `unhealthy` ou não subir, consulte os logs:
+Aguarde os serviços com healthcheck aparecerem como `healthy`. Notifications
+não tem healthcheck configurado; confira seus logs para confirmar que iniciou.
+O Compose inicia os bancos e Kafka antes dos serviços que dependem deles,
+Notifications após Orders e Gateway antes do frontend. Se algum serviço ficar
+`unhealthy` ou não subir, consulte os logs:
 
 ```bash
 docker compose logs -f orders
+```
+
+Para consultar logs de Notifications:
+
+```bash
+docker compose logs -f notifications
 ```
 
 Portas disponíveis no computador (acessíveis apenas a partir da própria
@@ -60,10 +68,14 @@ máquina):
 | Products   | `http://localhost:8081` |
 | Orders     | `http://localhost:8082` |
 | Auth       | `http://localhost:8083` |
+| Notifications | `http://localhost:8085` |
 | Frontend   | `http://localhost:5173` |
 | PostgreSQL | `localhost:5432`        |
-| MongoDB    | `localhost:27017`       |
+| MongoDB    | `localhost:27018`       |
 | Kafka      | `localhost:9092`        |
+
+O MongoDB usa a porta interna `27017` entre containers; `27018` é a porta
+publicada no host.
 
 Se o Docker informar que uma porta já está em uso, encerre o programa que a
 ocupa ou altere apenas o número do lado esquerdo do mapeamento no
@@ -119,13 +131,15 @@ será usado no teste de Orders.
 ## 3. Verificar Orders
 
 Crie um pedido pelo Gateway, substituindo `ID_DO_PRODUTO` pelo identificador
-copiado da resposta de Products:
+copiado da resposta de Products. Use `CLI-001` como `userId` para que a
+notificação também corresponda ao identificador consultado atualmente pelo
+frontend:
 
 ```bash
 curl -i -X POST http://localhost:8080/api/orders \
   -H 'Content-Type: application/json' \
   --data-raw '{
-    "userId": "teste-integracao",
+    "userId": "CLI-001",
     "items": [
       {
         "productId": "ID_DO_PRODUTO",
@@ -142,7 +156,7 @@ persiste o pedido no PostgreSQL e publica um evento no Kafka.
 Consulte os pedidos do usuário de teste:
 
 ```bash
-curl -i http://localhost:8080/api/orders/user/teste-integracao
+curl -i http://localhost:8080/api/orders/user/CLI-001
 ```
 
 Para consultar um pedido individual, use o `id` retornado na criação:
@@ -185,7 +199,37 @@ anterior. O consumidor deve exibir uma mensagem JSON com `orderId`,
 Ele lê mensagens existentes e novas; compare `clienteId` e `orderId` para
 identificar o pedido deste teste.
 
-## 5. Abrir o frontend
+## 5. Verificar Notifications e a notificação no frontend
+
+Deixe os logs de Notifications abertos em um terminal:
+
+```bash
+docker compose logs -f notifications
+```
+
+Em outro terminal, crie um novo pedido usando o comando da seção Orders. O
+serviço deve registrar `[NOTIFICAÇÃO] Processando evento do Pedido ID` e os
+dados do pedido.
+
+Consulte a lista de notificações pelo Gateway:
+
+```bash
+curl -i http://localhost:8080/api/notifications/cliente/CLI-001
+```
+
+Ou diretamente no serviço Notifications:
+
+```bash
+curl -i http://localhost:8085/notifications/cliente/CLI-001
+```
+
+O esperado é `200 OK` com a notificação do pedido. Com o frontend aberto,
+clique no sino; a lista é consultada periodicamente e pode levar alguns
+segundos para atualizar. Notifications mantém a lista somente em memória:
+reiniciar ou recriar o container apaga as notificações, mas não apaga os
+pedidos armazenados no PostgreSQL nem os produtos no MongoDB.
+
+## 6. Abrir o frontend
 
 Com os serviços em execução, abra:
 
@@ -197,7 +241,11 @@ O frontend consulta a vitrine de produtos por meio do proxy para o Gateway. O
 checkout visual ainda não cria pedidos; para testar a criação, use o `curl` da
 seção Orders.
 
-## 6. Encerrar o ambiente
+O build/login do Auth atual ainda impede validar o fluxo completo de
+autenticação pelo frontend; veja a observação da seção 1. Os testes de
+Products, Orders e Notifications podem ser feitos pelas APIs descritas acima.
+
+## 7. Encerrar o ambiente
 
 Para parar e remover os containers sem apagar os dados persistidos nos volumes:
 

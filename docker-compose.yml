@@ -2,7 +2,7 @@ services:
   mongodb:
     image: mongo:8
     ports:
-      - "127.0.0.1:27017:27017"
+      - "27018:27017"
     volumes:
       - mongodb-data:/data/db
     healthcheck:
@@ -58,13 +58,14 @@ services:
       context: ./products
     environment:
       SPRING_MONGODB_URI: mongodb://mongodb:27017/productsdb
+      SERVER_PORT: 8080
     ports:
       - "127.0.0.1:8081:8080"
     depends_on:
       mongodb:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:8080/products > /dev/null"]
+      test: [ "CMD-SHELL", "curl --fail --silent http://127.0.0.1:8080/products > /dev/null || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -79,8 +80,9 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-orders_local_dev}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       PRODUCTS_SERVICE_URL: http://products:8080
+      SERVER_PORT: 8080   # <- FORÇA O SPRING DENTRO DO CONTAINER A USAR A PORTA 8080
     ports:
-      - "127.0.0.1:8082:8080"
+      - "127.0.0.1:8082:8080"  # <- 8082 no seu host (máquina), 8080 dentro da rede Docker
     depends_on:
       postgres:
         condition: service_healthy
@@ -89,7 +91,7 @@ services:
       products:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8080'"]
+      test: [ "CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8080'" ]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -114,6 +116,7 @@ services:
       PRODUCTS_SERVICE_URL: http://products:8080
       ORDERS_SERVICE_URL: http://orders:8080
       AUTH_SERVICE_URL: http://auth:8080
+      NOTIFICATIONS_SERVICE_URL: http://notifications:8085
     ports:
       - "127.0.0.1:8080:8080"
     depends_on:
@@ -123,6 +126,8 @@ services:
         condition: service_healthy
       auth:
         condition: service_healthy
+      notifications:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8080'"]
       interval: 10s
@@ -142,11 +147,13 @@ services:
         condition: service_healthy
 
   notifications:
-    build:
-      context: ./notifications
+    build: ./notifications
+    container_name: notifications-service
+    ports:
+      - "8085:8085"
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      APP_KAFKA_TOPIC_PEDIDO: pedido-criado-topic
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - APP_KAFKA_TOPIC_PEDIDO=pedido-criado-topic
     depends_on:
       kafka:
         condition: service_healthy

@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN ./gradlew bootJar
+RUN bash ./gradlew bootJar
 
 EXPOSE 8080
 
