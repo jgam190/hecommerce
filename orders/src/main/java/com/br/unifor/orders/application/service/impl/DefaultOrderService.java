@@ -59,14 +59,20 @@ public class DefaultOrderService implements OrderService {
             }
 
             ProdutoDto produto = productClient.findProductById(itemRequest.getProductId());
+
+
             if (produto == null) {
                 throw new IllegalArgumentException("Produto não encontrado: " + itemRequest.getProductId());
             }
+
+
+            if ("Produto indisponível temporariamente".equals(produto.getNome()) || produto.getPreco() == null || produto.getPreco().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalStateException("O catálogo de produtos está temporariamente indisponível. Não foi possível concluir a criação do pedido.");
+            }
+
+
             if (!produto.isAtivo()) {
                 throw new IllegalArgumentException("Produto inativo: " + itemRequest.getProductId());
-            }
-            if (produto.getPreco() == null || produto.getPreco().signum() <= 0) {
-                throw new IllegalArgumentException("Preço inválido para produto: " + itemRequest.getProductId());
             }
 
             BigDecimal precoUnitario = produto.getPreco();

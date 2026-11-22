@@ -122,6 +122,12 @@ a {
   border: 1px solid #83dfa0;
 }
 
+.botao-sair {
+  color: white;
+  background: transparent;
+  border: 1px solid #525b54;
+}
+
 .botao-carrinho {
   color: white;
   background: transparent;
@@ -679,4 +685,28 @@ a {
   .modal {
     padding: 30px 22px;
   }
+
+
+  .botao-notificacoes {
+    background: transparent;
+    border: none;
+    color: #d9e2dc;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .botao-notificacoes:hover {
+    color: #82dfa0;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .botao-notificacoes svg {
+    display: block;
+  }
+
 }

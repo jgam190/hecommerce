@@ -19,37 +19,15 @@ public class GatewayConfig {
     @Bean
     public RouteLocator apiRoutes(
             RouteLocatorBuilder builder,
-            @Value("${services.products.base-url}") String productsBaseUrl,
-            @Value("${services.orders.base-url}") String ordersBaseUrl,
             @Value("${services.auth.base-url}") String authBaseUrl) {
         return builder.routes()
-                // Serviço de Autenticação (stripPrefix(2): /api/auth/** -> /login)
-                .route(r -> r.path("/api/auth/**")
-                        .filters(f -> f.stripPrefix(2))
-                        .uri(authBaseUrl))
                 .route(r -> r.path("/api/protected/**")
                         .filters(f -> f.stripPrefix(1))
                         .uri(authBaseUrl))
-
-                // Serviço de Catálogo (Produtos)
-                .route(r -> r.path("/api/products/**")
-                        .filters(f -> f.stripPrefix(1))
-                        .uri(productsBaseUrl))
-
-                // Serviço de Pedidos (stripPrefix(1): /api/orders/** -> /orders)
-                .route(r -> r.path("/api/orders/**")
-                        .filters(f -> f.stripPrefix(1))
-                        .uri(ordersBaseUrl))
-
-                // Serviço de Pagamentos
                 .route(r -> r.path("/api/payments/**")
                         .uri("http://payments:8080"))
-
-                // Serviço de Logística
                 .route(r -> r.path("/api/logistics/**")
                         .uri("http://logistics:8080"))
-
-                // Serviço de Recomendação
                 .route(r -> r.path("/api/recommendation/**")
                         .uri("http://recommendation:8080"))
 

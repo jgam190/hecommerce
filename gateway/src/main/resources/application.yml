@@ -26,6 +26,48 @@ spring:
                 allowed-headers: "*"
                 max-age: 3600
 
+          routes:
+            - id: auth-service
+              uri: ${AUTH_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/auth/**, /auth/**
+              filters:
+                - RewritePath=/api/?(?<segment>.*), /$\{segment}
+                - name: CircuitBreaker
+                  args:
+                    name: authCircuitBreaker
+                    fallbackUri: forward:/fallback/auth
+
+            - id: products-service
+              uri: ${PRODUCTS_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/products/**, /products/**
+              filters:
+                - RewritePath=/api/?(?<segment>.*), /$\{segment}
+                - name: CircuitBreaker
+                  args:
+                    name: productsCircuitBreaker
+                    fallbackUri: forward:/fallback/products
+
+            - id: orders-service
+              uri: ${ORDERS_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/orders/**, /orders/**
+              filters:
+                - RewritePath=/api/?(?<segment>.*), /$\{segment}
+                - name: CircuitBreaker
+                  args:
+                    name: ordersCircuitBreaker
+                    fallbackUri: forward:/fallback/orders
+
+            - id: notifications-service
+              uri: ${NOTIFICATIONS_SERVICE_URL:http://localhost:8085}
+              predicates:
+                - Path=/api/notifications/**, /notifications/**
+              filters:
+                - RewritePath=/api/?(?<segment>.*), /$\{segment}
+
+
 services:
   products:
     base-url: ${PRODUCTS_SERVICE_URL:http://localhost:8081}
@@ -33,3 +75,44 @@ services:
     base-url: ${ORDERS_SERVICE_URL:http://localhost:8082}
   auth:
     base-url: ${AUTH_SERVICE_URL:http://localhost:8083}
+
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      productsCircuitBreaker:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10000ms
+        permitted-number-of-calls-in-half-open-state: 3
+      ordersCircuitBreaker:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10000ms
+        permitted-number-of-calls-in-half-open-state: 3
+      authCircuitBreaker:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10000ms
+        permitted-number-of-calls-in-half-open-state: 3
+  timelimiter:
+    instances:
+      productsCircuitBreaker:
+        timeout-duration: 3s
+      ordersCircuitBreaker:
+        timeout-duration: 3s
+      authCircuitBreaker:
+        timeout-duration: 3s
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus, circuitbreakers, circuitbreakerevents
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true

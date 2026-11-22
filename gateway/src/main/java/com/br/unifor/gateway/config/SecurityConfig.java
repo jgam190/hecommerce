@@ -14,10 +14,11 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
-                    .pathMatchers("/api/products/**").permitAll()
-                    .pathMatchers("/api/auth/**").permitAll()
-                    .pathMatchers("/api/orders/**").permitAll()
-                    .anyExchange().authenticated()
+                        .pathMatchers("/api/products/**", "/products/**").permitAll()
+                        .pathMatchers("/api/auth/**", "/auth/**").permitAll()
+                        .pathMatchers("/api/orders/**", "/orders/**").permitAll()
+                        .pathMatchers("/api/notifications/**", "/notifications/**").permitAll() // <- Liberado para evitar o 401
+                        .anyExchange().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
                 .build();
